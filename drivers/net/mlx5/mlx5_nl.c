@@ -678,11 +678,22 @@ mlx5_nl_mac_addr_sync(struct rte_eth_dev *dev)
 				break;
 		if (j != MLX5_MAX_MAC_ADDRESSES)
 			continue;
-		/* Find the first entry available. */
-		for (j = 0; j != MLX5_MAX_MAC_ADDRESSES; ++j) {
-			if (rte_is_zero_ether_addr(&dev->data->mac_addrs[j])) {
-				dev->data->mac_addrs[j] = macs[i];
-				break;
+		if (rte_is_multicast_ether_addr(&macs[i])) {
+			/* Find the first entry available. */
+			for (j = MLX5_MAX_UC_MAC_ADDRESSES;
+			     j != MLX5_MAX_MAC_ADDRESSES; ++j) {
+				if (rte_is_zero_ether_addr(&mac_addrs[j])) {
+					mac_addrs[j] = macs[i];
+					break;
+				}
+			}
+		} else {
+			/* Find the first entry available. */
+			for (j = 0; j != MLX5_MAX_UC_MAC_ADDRESSES; ++j) {
+				if (rte_is_zero_ether_addr(&mac_addrs[j])) {
+					mac_addrs[j] = macs[i];
+					break;
+				}
 			}
 		}
 	}
